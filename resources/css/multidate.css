@@ -1,0 +1,93 @@
+.ux-datepicker-active {
+    cursor:pointer;
+    color:#000;
+    background:repeat-x left top;
+    background-color:#ddecfe;
+}
+
+.ux-datepicker-inner,.ux-datepicker-inner td,.ux-datepicker-inner th {
+    border-collapse:separate;
+}
+
+table.ux-datepicker-inner {
+    width:100%;
+    table-layout:fixed;
+}
+
+table.ux-datepicker-inner th {
+    width:25px;
+    height:19px;
+    color:#233d6d;
+    font:normal 10px tahoma, arial, verdana, sans-serif;
+    text-align:right;
+    border-bottom:1px solid #b2d1f5;
+    border-collapse:separate;
+    background-color:#dfecfb;
+    background-image:linear-gradient(top, #edf4fd,#cde1f9);
+    cursor:default;
+    padding:0;
+}
+
+table.ux-datepicker-inner th span {
+    display:block;
+    padding-right:7px;
+}
+
+table.ux-datepicker-inner td {
+    border:1px solid;
+    height:17px;
+    text-align:right;
+    border-color:#FFF;
+    padding:0;
+}
+
+table.ux-datepicker-inner a {
+    padding-right:4px;
+    display:block;
+    zoom:1;
+    font:normal 11px tahoma, arial, verdana, sans-serif;
+    color:#000;
+    text-decoration:none;
+    text-align:right;
+}
+
+table.ux-datepicker-inner .ux-datepicker-active {
+    cursor:pointer;
+    color:#000;
+    border:1px solid;
+    border-color:#ff0000;
+}
+
+table.ux-datepicker-inner .x-datepicker-selected a {
+    background:repeat-x left top;
+    background-color:#dae5f3;
+    border:1px solid #8db2e3;
+}
+
+table.ux-datepicker-inner .x-datepicker-selected span {
+    font-weight:700;
+}
+
+table.ux-datepicker-inner .x-datepicker-today a {
+    border:1px solid;
+    border-color:#8B0000;
+}
+
+table.ux-datepicker-inner .x-datepicker-prevday a,table.ux-datepicker-inner .x-datepicker-nextday a {
+    text-decoration:none!important;
+    color:#aaa;
+}
+
+table.ux-datepicker-inner a:hover,table.ux-datepicker-inner .x-datepicker-disabled a:hover {
+    text-decoration:none!important;
+}
+
+table.ux-datepicker-inner .u-datepicker-disabled a {
+    cursor:default;
+    background-color:#eee;
+    color:#bbb;
+}
+
+.x-item-disabled .ux-datepicker-inner a:hover {
+    background:none;
+}

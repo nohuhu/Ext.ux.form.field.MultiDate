@@ -1,0 +1,31 @@
+Ext.ux.form.field.MultiDate
+===========================
+
+This class is an extension for Ext JS 4 that implements a form field
+that allows entering multiple dates and date ranges.
+
+Features:
+    - No limit for number of dates or date ranges
+    - Separate settings for input format, display format and submit
+      format of range values
+    - Backwards compatibility: multi-value input can be turned off
+      by setting one option, in this case behavior is similar to
+      stock Date field
+    - Support for configurable work week days selection
+    - Press space in picker to select/unselect single day
+    - Shift-space or shift-click in picker selects work week
+    - Ctrl-backspace in picker clears selection
+    - Ctrl-click in picker selects freeform ranges: ctrl-click once
+      to set start date, ctrl-click again to set end date and
+      select all dates between. Works across several months/years too
+    - Ctrl-shift-click in picker selects freeform ranges but includes
+      only work days
+    - Enter in picker to confirm selection
+    - Escape in picker to cancel selection
+
+For usage, see demo application.
+
+This extension is released under GPL 3.0 license. Commercial licensing
+is also available.
+
+Copyright (c) 2011 by Alexander Tokarev, <nohuhu@nohuhu.org>.
