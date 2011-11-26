@@ -1,10 +1,12 @@
 Ext.ux.form.field.MultiDate
 Ext.ux.form.field.MultiMonth
+Ext.ux.form.field.MultiTime
 ============================
 
 Thise classes are an extension for Ext JS 4. They implement a form field
-that allows entering multiple dates and date ranges, and form field that
-allows entering month ranges respectively.
+that allows entering multiple dates and date ranges, form field that
+allows entering month ranges and form field that allows entering time
+intervals respectively.
 
 MultiDate features:
     - No limit for number of dates or date ranges
@@ -34,11 +36,26 @@ MultiMonth features:
       will allow only single month to be entered
     - New enhanced Month picker for visual date selection
 
+MultiTime features:
+    - Allows entering starting and ending times for an interval of time
+    - Separate settings for input format, display and submit formats
+    - Fully themed with CSS sheet provided
+    - Switched behavior: set multiValue property to false and field
+      will allow only single point in time to be entered
+    - Brand new Time picker for visual time selection
+    - Supports time validation
+    - Set minValue/maxValue to limit earliest and latest times available,
+      including picker
+    - Dynamically changing picker that tracks selection to disable
+      invalid time choices both in multi- and single-value modes
+    - Configurable time increment: 15, 30 or 60 minutes
+
 Tested in:
+    - MSIE 6, 7, 8, 9
     - Chrome 15
     - Firefox 7
+    - Opera 11
     - Safari 5
-    - MSIE 8
 
 For usage, see demo applications.
 

@@ -1,0 +1,171 @@
+.ux-timepicker {
+    position: absolute;
+    left: 0;
+    top: 0;
+	border:1px solid #1b376c;
+	background-color:#FFF;
+}
+
+.ux-timepicker-buttons {
+    position:relative;
+    border-top:1px solid #b2d1f5;
+    background-color:#dfecfb;
+    background-image:linear-gradient(top, #dee8f5,#d1dff0 49%,#c7d8ed 51%,#cbdaee);
+    text-align:center;
+    vertical-align: middle;
+    height: 30px;
+}
+
+.ux-timepicker-buttons div {
+    margin-left: 10px;
+    margin-top: 3px;
+}
+
+.ux-timepicker-table {
+    display: table;
+    width: 100%;
+}
+
+.ux-timepicker-table-row {
+    display: table-row;
+}
+
+.ux-timepicker-table-cell {
+    display: table-cell;
+}
+
+.ux-timepicker-header {
+    font: normal 11px tahoma, arial, verdana, sans-serif;
+    height: 26px;
+    position:relative;
+    border-bottom:1px solid #b2d1f5;
+    background-image:none;
+
+    color: white;
+    background-color:#23427c;
+    background-image:-webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #264888), color-stop(100%, #1f3a6c));
+    background-image:-webkit-linear-gradient(top, #264888,#1f3a6c);
+    background-image:-moz-linear-gradient(top, #264888,#1f3a6c);
+    background-image:-o-linear-gradient(top, #264888,#1f3a6c);
+    background-image:-ms-linear-gradient(top, #264888,#1f3a6c);
+    background-image:linear-gradient(top, #264888,#1f3a6c)
+}
+
+.ux-timepicker-header-item {
+    display: table-cell;
+    width: 50%;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.ux-timepicker-header-item-ie {
+    width: 176px;
+    float: left;
+    text-align: center;
+    margin-top: 7px;
+}
+
+.ux-timepicker-inner-border {
+    border-left: 2px solid #1B376C;
+}
+
+.ux-timepicker-item
+{
+    float: left;
+	margin:4px 0 5px;
+	font:normal 11px tahoma, arial, verdana, sans-serif;
+	text-align:center;
+	vertical-align:middle;
+	height:17px;
+	width:44px;
+	border:0 none;
+}
+
+.ux-timepicker-item a
+{
+	display:block;
+	margin:0 5px;
+	text-decoration:none;
+	color:#15428b;
+	border:1px solid #FFF;
+	line-height:17px;
+}
+
+.ux-timepicker-item a:hover
+{
+	background-color:#ddecfe;
+}
+
+.ux-timepicker-item a.ux-timepicker-selected
+{
+	background-color:#dfecfb;
+	border:1px solid #8db2e3;
+}
+
+.ux-timepicker-disabled {
+    cursor:default;
+    text-decoration: none !important;
+    background-color:transparent !important;
+    color:#bbb !important;
+}
+
+.ux-timepicker-disabled a:hover {
+    cursor:default;
+    text-decoration: none !important;
+    background-color:transparent;
+    color:#bbb !important;
+}
+
+.ux-timepicker-ampm {
+    width: 88px;
+}
+
+.ux-timepicker-separator {
+    height: 15px;
+    text-align: center;
+}
+
+.ux-timepicker-separator-text {
+    height: 15px;
+    color: #1b376c;
+	font:normal 11px tahoma, arial, verdana, sans-serif;
+    width: 50px !important;
+	vertical-align:middle;
+	float: left;
+}
+
+.ux-timepicker-separator-stricken {
+    height: 15px;
+    color: #1b376c;
+	font:normal 11px tahoma, arial, verdana, sans-serif;
+    text-decoration: line-through;
+    overflow: hidden;
+	vertical-align:middle;
+	float: left;
+}
+
+.ux-timepicker-separator-left {
+    text-align: left;
+    margin-left: 5px;
+    width: 60px;
+}
+
+.ux-timepicker-separator-right {
+    text-align: right;
+    width: 55px;
+}
+
+.ux-timepicker-body {
+    width: 176px;
+}
+
+.ux-timepicker-minutes {
+    height: 28px !important;
+}
+
+.ux-timepicker-table-row-ie {}
+
+.ux-timepicker-table-cell-ie {
+    float: left;
+}
+

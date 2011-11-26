@@ -2,7 +2,7 @@
     Mixin that allows multiple values or ranges of values of the same type to be entered in
     a field.
 
-    Version 0.9
+    Version 0.92
 
     Copyright (C) 2011 Alexander Tokarev.
     

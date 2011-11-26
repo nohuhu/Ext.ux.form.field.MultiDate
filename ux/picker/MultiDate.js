@@ -1,7 +1,7 @@
 /*
     Date picker with support for multiple selections
 
-    Version 0.9
+    Version 0.92
 
     Copyright (C) 2011 Alexander Tokarev.
     

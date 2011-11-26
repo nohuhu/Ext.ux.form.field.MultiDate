@@ -1,5 +1,5 @@
 /*
-    MultiDate input field demo application.
+    MultiTime input field demo application.
     
     Version 0.92
 
@@ -23,12 +23,12 @@ Ext.Loader.setConfig({
     enabled:        true,
     disableCaching: true,
     paths: {
-        'Ext.ux':  'ux'
+        'Ext.ux':  '../ux'
     }
 });
 
 Ext.require([
-    'Ext.ux.form.field.MultiDate'
+    'Ext.ux.form.field.MultiTime'
 ]);
 
 var store, panel;
@@ -61,12 +61,15 @@ Ext.onReady(function() {
         y:  20,
         
         items: [{
-            xtype: 'multidatefield',
-            id: 'multiDateField',
+            xtype: 'multitimefield',
+            id: 'multiTimeField',
             allowBlank: false,
+            increment: 30,
             multiValue: true,
-            submitFormat: 'Y-m-d',
+            submitFormat: 'H:i',
             submitRangeSeparator: '/',
+            minValue: '8:00am',
+            maxValue: '5:00pm'
         }, {
             xtype: 'button',
             id:    'validateButton',
@@ -75,7 +78,7 @@ Ext.onReady(function() {
                 var form, field;
                 
                 form  = Ext.getCmp('formPanel').getForm();
-                field = Ext.getCmp('multiDateField');
+                field = Ext.getCmp('multiTimeField');
                 
                 if ( form.isValid() ) {
                     var values = form.getValues();

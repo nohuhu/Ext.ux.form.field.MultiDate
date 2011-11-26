@@ -2,7 +2,7 @@
 	Input field that allows multiple date values, including
 	multiple contiguous ranges.
 
-    Version 0.9
+    Version 0.92
 
     Copyright (C) 2011 Alexander Tokarev.
     
