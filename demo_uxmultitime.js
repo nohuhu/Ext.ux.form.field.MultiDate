@@ -1,7 +1,7 @@
 /*
     MultiTime input field demo application.
     
-    Version 0.92
+    Version 0.93
 
     Copyright (C) 2011 Alexander Tokarev.
     
@@ -23,7 +23,7 @@ Ext.Loader.setConfig({
     enabled:        true,
     disableCaching: true,
     paths: {
-        'Ext.ux':  '../ux'
+        'Ext.ux':  'ux'
     }
 });
 
