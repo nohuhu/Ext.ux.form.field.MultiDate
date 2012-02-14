@@ -3,7 +3,7 @@ Ext.ux.form.field.MultiMonth
 Ext.ux.form.field.MultiTime
 ============================
 
-Thise classes are an extension for Ext JS 4. They implement a form field
+These classes are an extension for Ext JS 4. They implement a form field
 that allows entering multiple dates and date ranges, form field that
 allows entering month ranges and form field that allows entering time
 intervals respectively.
