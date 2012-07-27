@@ -1,26 +1,20 @@
 /*
-	Input field that allows multiple date values, including
-	multiple contiguous ranges.
-
-    Version 0.92
-
-    Copyright (C) 2011 Alexander Tokarev.
-    
-    Usage: drop-in replacement for Ext.form.field.Date
-    
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Input field that allows multiple date values, including multiple contiguous ranges.
+ *
+ * Version 0.99, compatible with Ext JS 4.1.
+ *  
+ * Copyright (c) 2011-2012 Alexander Tokarev.
+ *  
+ * Usage: drop-in replacement for Ext.form.field.Date. See demo application
+ * for more details.
+ *
+ * This code is licensed under the terms of the Open Source LGPL 3.0 license.
+ * Commercial use is permitted to the extent that the code/component(s) do NOT
+ * become part of another Open Source or Commercially licensed development library
+ * or toolkit without explicit permission.
+ * 
+ * License details: http://www.gnu.org/licenses/lgpl.html
+ */
 
 Ext.define('Ext.ux.form.field.MultiDate', {
 	extend: 'Ext.form.field.Date',
@@ -37,7 +31,22 @@ Ext.define('Ext.ux.form.field.MultiDate', {
 	mixins: {
 	    multivalue: 'Ext.ux.form.field.MultiValue'
 	},
-	
+
+    /**
+     * @cfg {String} okText OK button text.
+     */
+    okText: 'OK',
+    
+    /**
+     * @cfg {String} cancelText Cancel button text.
+     */
+    cancelText: 'Cancel',
+    	
+    /**
+     * @cfg {String} clearText 'Clear' button text.
+     */
+    clearText: 'Clear',
+
 	/**
 	 * @cfg {String} multiDisabledText
 	 * Error text to display when multiple values are entered while multiValue is false.
@@ -75,6 +84,55 @@ Ext.define('Ext.ux.form.field.MultiDate', {
         };
     },
     
+    initValue: function() {
+        var me    = this,
+            value = me.value;
+        
+        if ( value && Ext.isString(value) ) {
+            me.setRawValue(value);
+        }
+        else if ( Ext.isDate(value) ) {
+            me.setRawValue( me.formatDisplayValue(value) );
+        }
+        else {
+            return;
+        };
+        
+        me.validate();
+    },
+    
+    setValue: function(value, isSubmit) {
+        var me = this;
+        
+        if ( isSubmit ) {
+            me.setSubmitValue(value);
+        }
+        else {
+            me.callParent([value]);
+        };
+    },
+    
+    setSubmitValue: function(value) {
+        var me = this,
+            fmt = me.submitFormat,
+            vsep, rsep, values, collapsed, text;
+        
+        vsep = new XRegExp(me.submitValueSeparator);
+        rsep = new XRegExp(me.submitRangeSeparator);
+        
+        values = me.expandValues(value, fmt, vsep, rsep);
+        
+        if ( values && values.length ) {
+            collapsed = me.collapseRange(values);
+            text      = me.formatDisplay(collapsed);
+            
+            me.setRawValue(text);
+        }
+        else {
+            me.setRawValue('');
+        };
+    },
+    
     getSubmitValue: function() {
         var me = this,
             values;
@@ -108,6 +166,9 @@ Ext.define('Ext.ux.form.field.MultiDate', {
             format: me.format,
             showToday: me.showToday,
             startDay: me.startDay,
+            okText: me.okText,
+            cancelText: me.cancelText,
+            clearText: me.clearText,
             workDays: Ext.Array.sort(me.workDays, function(a, b) { return a - b }),
             minText: format(me.minText, me.formatDate(me.minValue)),
             maxText: format(me.maxText, me.formatDate(me.maxValue)),
@@ -124,7 +185,7 @@ Ext.define('Ext.ux.form.field.MultiDate', {
             vsep = me.valueSeparatorRE,
             rsep = me.rangeSeparatorRE,
             errors = [],
-            matches, range, isValid;
+            matches, range, isValid, dt;
         
         if ( values === null || values.length < 1 ) {
             if ( !me.allowBlank ) {
@@ -142,17 +203,25 @@ Ext.define('Ext.ux.form.field.MultiDate', {
         
         MATCHES:
         for ( var i = 0, l = matches.length; i < l; i++ ) {
-            range = me.splitValues(matches[i], rsep);
+            var match = matches[i];
+        
+            // Try to validate the match as a single date; it may just be one
+            dt = me.parseDate(match);
             
-            if ( range.length > 1 ) {       // Got date range
-                if ( !multi ) {
-                    errors.push(me.multiDisabledText);
-                };
-                
-                isValid = me.validateRange(range);
+            if ( Ext.isDate(dt) ) {
+                isValid = me.validateDate(match);
+            }
+            else if ( !rsep.test(match) ) {
+                isValid = Ext.String.format(me.invalidText, match, me.format);
             }
             else {
-                isValid = me.validateDate( range[0] );
+                range = me.splitValues(match, rsep);
+                
+                if ( !multi && range.length > 1 ) {       // Got date range
+                    errors.push(me.multiDisabledText);
+                };
+                    
+                isValid = me.validateRange(range);
             };
 
             if ( isValid !== true ) {
@@ -163,6 +232,15 @@ Ext.define('Ext.ux.form.field.MultiDate', {
         return errors;
     },
     
+    splitValues: function(values, regex) {
+        var me = this;
+        
+        return Ext.isString(values) &&
+               regex.source !== '' && values.match(regex)   ? values.split(regex)
+             :                                                [ values ]
+             ;
+    },
+
     onExpand: function() {
         var me = this,
             text, values;
@@ -201,6 +279,17 @@ Ext.define('Ext.ux.form.field.MultiDate', {
         me.collapse();
     },
     
+    parseDate: function(value, format) {
+        var me = this,
+            dt;
+        
+        if ( format && (dt = me.safeParse(value, format)) ) {
+            return dt;
+        };
+        
+        return me.callParent([value]);
+    },
+    
     validateDate: function(value) {
         var me = this,
             dt;
@@ -227,14 +316,52 @@ Ext.define('Ext.ux.form.field.MultiDate', {
         } catch (e) {};
         
         if ( !isDate(start) || !isDate(end) ) {
-            return format(me.invalidRangeText, me.formatDisplayRange(range, rsep) );
+            return format(me.invalidRangeText, range[0] + rsep + range[1] );
         };
         
         if ( start.getTime() > end.getTime() ) {
             return format(me.invalidRangeEndsText, me.formatDisplayRange(range, rsep) );
         };
         
+        if ( (isValid = me.validateDate(range[0])) !== true ) {
+            return isValid;
+        };
+        
+        if ( (isValid = me.validateDate(range[1])) !== true ) {
+            return isValid;
+        };
+        
         return true;
+    },
+    
+    formatSubmit: function(values, rsep, vsep) {
+        var me = this,
+            multi = me.multiValue,
+            valsep = me.valueSeparatorRE,
+            ransep = me.rangeSeparatorRE,
+            items, isStr, doesMatch, dt;
+        
+        items = me.splitValues(values, valsep);
+        
+        for ( var i = 0, l = items.length; i < l; i++ ) {
+            var item = items[i],
+                vr;
+            
+            if ( Ext.isDate( me.parseDate(item) ) ) {
+                items[i] = me.formatSubmitValue(item);
+            }
+            else {
+                vr = me.splitValues(item, ransep);
+                
+                items[i] = vr.length > 1 ? me.formatSubmitRange(vr, rsep || me.submitRangeSeparator)
+                         :                 me.formatSubmitValue(vr)
+                         ;
+            };
+        };
+        
+        values = items.join(vsep || me.submitValueSeparator);
+        
+        return values;
     },
     
     formatSubmitValue: function(value) {
@@ -253,19 +380,18 @@ Ext.define('Ext.ux.form.field.MultiDate', {
     formatDisplayValue: function(value) {
         var me = this,
             fmt = me.format,
-            res;
+            dt, res;
         
         try { res = Ext.Date.format(value, fmt); } catch (e) {};
         
         return Ext.isString(res) ? res : '';
     },
     
-    expandValues: function(text) {
-        var me = this,
-            vsep = me.valueSeparatorRE,
-            rsep = me.rangeSeparatorRE,
-            fmt = me.format,
-            values,
+    expandValues: function(text, format, vSeparator, rSeparator) {
+        var me   = this,
+            vsep = vSeparator || me.valueSeparatorRE,
+            rsep = rSeparator || me.rangeSeparatorRE,
+            values, dt,
             result = [];
         
         if ( text === '' || text === null ) {
@@ -275,25 +401,34 @@ Ext.define('Ext.ux.form.field.MultiDate', {
         values = me.splitValues(text, vsep);
         
         for ( var i = 0, l = values.length; i < l; i++ ) {
-            var range = me.splitValues( values[i], rsep );
+            var value = values[i];
             
-            // Ugh. What an ugliness.
-            result = [].concat( result, 
-                                range.length > 1 ? me.expandRange(range)
-                              :                    me.safeParse( range[0], fmt )
-                              );
+            dt = me.parseDate(value, format);
+            
+            if ( Ext.isDate(dt) ) {
+                result.push(dt);
+            }
+            else {
+                var range = me.splitValues(value, rsep);
+                
+                // Ugh. What an ugliness.
+                result = [].concat( result, 
+                                    range.length > 1 ? me.expandRange(range, format)
+                                  :                    me.parseDate(range[0])
+                                  );
+            };
         };
         
         return result;
     },
     
-    expandRange: function(range) {
+    expandRange: function(range, format) {
         var me = this,
             start, end,
             result = [];
         
-        start = me.parseDate( range[0] );
-        end   = me.parseDate( range[1] );
+        start = me.parseDate( range[0], format );
+        end   = me.parseDate( range[1], format );
         
         if ( !Ext.isDate(start) || !Ext.isDate(end) || Ext.Date.getElapsed(start, end) < 0 ) {
             return [];

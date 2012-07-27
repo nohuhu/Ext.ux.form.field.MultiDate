@@ -1,25 +1,19 @@
 /*
-    Input field that allows time range to be entered.
-
-    Version 0.92
-
-    Copyright (C) 2011 Alexander Tokarev.
-    
-    Usage: not intended to be used directly
-    
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Input field that allows time range to be entered.
+ *
+ * Version 0.99, compatible with Ext JS 4.1.
+ *  
+ * Copyright (c) 2011-2012 Alexander Tokarev.
+ *  
+ * Usage: see demo application.
+ *
+ * This code is licensed under the terms of the Open Source LGPL 3.0 license.
+ * Commercial use is permitted to the extent that the code/component(s) do NOT
+ * become part of another Open Source or Commercially licensed development library
+ * or toolkit without explicit permission.
+ * 
+ * License details: http://www.gnu.org/licenses/lgpl.html
+ */
 
 Ext.define('Ext.ux.form.field.MultiTime', {
     extend: 'Ext.ux.form.field.MultiMonth',
@@ -152,6 +146,8 @@ Ext.define('Ext.ux.form.field.MultiTime', {
      * @cfg {String} invalidIncrementText Text to display when time entered does not match increment.
      */
     invalidIncrementText: 'Time should be entered in {0} minutes increments',
+    
+    triggerCls: 'ux-form-time-trigger',
 
     valueSeparatorRE: /^$/,
     

@@ -169,3 +169,6 @@
     float: left;
 }
 
+.ux-form-time-trigger {
+    background-image: url('../images/time-trigger.gif');
+}

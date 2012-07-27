@@ -1,24 +1,18 @@
 /*
-    Mixin that allows multiple values or ranges of values of the same type to be entered in
-    a field.
-
-    Version 0.92
-
-    Copyright (C) 2011 Alexander Tokarev.
-    
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Mixin that allows multiple values or ranges of values of the same type to be entered in
+ * a field.
+ *
+ * Version 0.99, compatible with Ext JS 4.1.
+ *  
+ * Copyright (c) 2011-2012 Alexander Tokarev.
+ *  
+ * This code is licensed under the terms of the Open Source LGPL 3.0 license.
+ * Commercial use is permitted to the extent that the code/component(s) do NOT
+ * become part of another Open Source or Commercially licensed development library
+ * or toolkit without explicit permission.
+ * 
+ * License details: http://www.gnu.org/licenses/lgpl.html
+ */
 
 Ext.define('Ext.ux.form.field.MultiValue', {
     /**
@@ -233,7 +227,7 @@ Ext.define('Ext.ux.form.field.MultiValue', {
             results = [];
         
         if ( !multi ) {
-            return values[0].toString();
+            return me.formatDisplayValue(values[0]);
         };
         
         for ( var i = 0, l = values.length; i < l; i++ ) {

@@ -7,8 +7,14 @@
     display: table-row;
 }
 
+.ux-monthpicker-table-row-ie {}
+
 .ux-monthpicker-table-cell {
     display: table-cell;
+}
+
+.ux-monthpicker-table-cell-ie {
+    float: left;
 }
 
 .ux-monthpicker-header {
@@ -33,6 +39,13 @@
     width: 50%;
     text-align: center;
     vertical-align: middle;
+}
+
+.ux-monthpicker-header-item-ie {
+    float: left;
+    width: 176px;
+    text-align: center;
+    margin-top: 7px;
 }
 
 .ux-monthpicker-separator {

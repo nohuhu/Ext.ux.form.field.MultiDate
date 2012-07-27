@@ -1,25 +1,20 @@
 /*
-    Picker for selecting a range of months.
-
-    Version 0.92
-
-    Copyright (C) 2011 Alexander Tokarev.
-    
-    Usage: not intended to be used directly
-    
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Picker for selecting a range of months.
+ *
+ * Version 0.99, compatible with Ext JS 4.1.
+ *  
+ * Copyright (c) 2011-2012 Alexander Tokarev.
+ *  
+ * Usage: drop-in replacement for Ext.chart.Legend. See demo application
+ * for more details.
+ *
+ * This code is licensed under the terms of the Open Source LGPL 3.0 license.
+ * Commercial use is permitted to the extent that the code/component(s) do NOT
+ * become part of another Open Source or Commercially licensed development library
+ * or toolkit without explicit permission.
+ * 
+ * License details: http://www.gnu.org/licenses/lgpl.html
+ */
 
 Ext.define('Ext.ux.picker.MultiMonth', {
     extend: 'Ext.picker.Month',
@@ -30,14 +25,19 @@ Ext.define('Ext.ux.picker.MultiMonth', {
         'Ext.MultiMonthPicker'
     ],
     
+    childEls: [
+        'bodyEl', 'prevEl', 'nextEl', 'buttonsEl', 'monthEl', 'yearEl',
+        'eventEl', 'bodyElEnd', 'prevElEnd', 'nextElEnd'
+    ],
+
     renderTpl: [
         '<div class="{uxCls}-table">',
-            '<div class="{uxCls}-header {uxCls}-table-row">',
-                '<div class="{uxCls}-header-item">{startingMonthText}</div>',
-                '<div class="{uxCls}-header-item">{endingMonthText}</div>',
+            '<div class="{uxCls}-header {uxCls}-table-row{ie}">',
+                '<div class="{uxCls}-header-item{ie}">{startingMonthText}</div>',
+                '<div class="{uxCls}-header-item{ie}">{endingMonthText}</div>',
             '</div>',
-            '<div id="{id}-eventEl" class="{uxCls}-table-row">',
-                '<div id="{id}-bodyEl" class="{baseCls}-body {uxCls}-table-cell">',
+            '<div id="{id}-eventEl" class="{uxCls}-table-row{ie}">',
+                '<div id="{id}-bodyEl" class="{baseCls}-body {uxCls}-table-cell{ie}">',
                   '<div class="{baseCls}-months">',
                       '<tpl for="months">',
                           '<div class="{parent.baseCls}-item {parent.baseCls}-month"><a href="#" hidefocus="on">{.}</a></div>',
@@ -54,7 +54,7 @@ Ext.define('Ext.ux.picker.MultiMonth', {
                   '</div>',
                   '<div class="' + Ext.baseCSSPrefix + 'clear"></div>',
                 '</div>',
-                '<div id="{id}-bodyElEnd" class="{baseCls}-body {uxCls}-table-cell {uxCls}-separator">',
+                '<div id="{id}-bodyElEnd" class="{baseCls}-body {uxCls}-table-cell{ie} {uxCls}-separator">',
                   '<div class="{baseCls}-months">',
                       '<tpl for="months">',
                           '<div class="{parent.baseCls}-item {parent.baseCls}-month"><a href="#" hidefocus="on">{.}</a></div>',
@@ -74,7 +74,19 @@ Ext.define('Ext.ux.picker.MultiMonth', {
             '</div>',
         '</div>',
         '<tpl if="showButtons">',
-          '<div id="{id}-buttonsEl" class="{baseCls}-buttons"></div>',
+            '<div id="{id}-buttonsEl" class="{baseCls}-buttons">{%',
+                'var me        = values.$comp,',
+                    'okBtn     = me.okBtn,',
+                    'cancelBtn = me.cancelBtn,',
+                    'clearBtn  = me.clearBtn;',
+                
+                'okBtn.ownerLayout = cancelBtn.ownerLayout = clearBtn.ownerLayout = me.componentLayout;',
+                'okBtn.ownerCt     = cancelBtn.ownerCt     = clearBtn.ownerCt     = me;',
+                
+                'Ext.DomHelper.generateMarkup(okBtn.getRenderTree(), out);',
+                'Ext.DomHelper.generateMarkup(cancelBtn.getRenderTree(), out);',
+                'Ext.DomHelper.generateMarkup(clearBtn.getRenderTree(), out);',
+            '%}</div>',
         '</tpl>'
     ],
     
@@ -106,6 +118,14 @@ Ext.define('Ext.ux.picker.MultiMonth', {
         me.activeYearEnd = me.getYearEnd(new Date().getFullYear() - 4, -4);
         
         me.callParent();
+
+        if ( me.showButtons ) {
+            me.clearBtn = new Ext.button.Button({
+                text:     me.clearText,
+                handler:  me.onClearClick,
+                scope:    me
+            });
+        };
     },
     
     initEvents: function() {
@@ -118,7 +138,7 @@ Ext.define('Ext.ux.picker.MultiMonth', {
         evEl.addKeyListener(Ext.EventObject.ESC,   me.onCancelClick, me);
     },
     
-    onRender: function(ct, position) {
+    beforeRender: function() {
         var me = this,
             body;
         
@@ -129,12 +149,21 @@ Ext.define('Ext.ux.picker.MultiMonth', {
         Ext.apply(me.renderData, {
             uxCls:             me.uxCls,
             startingMonthText: me.startingMonthText,
-            endingMonthText:   me.endingMonthText
+            endingMonthText:   me.endingMonthText,
+            ie:                Ext.isIE6 || Ext.isIE7 ? '-ie' : ''
         });
         
-        me.addChildEls('eventEl', 'bodyElEnd', 'prevElEnd', 'nextElEnd');
-
         me.callParent(arguments);
+    },
+    
+    finishRenderChildren: function() {
+        var me = this;
+        
+        me.callParent();
+        
+        if ( me.showButtons ) {
+            me.clearBtn.finishRender();
+        };
     },
     
     afterRender: function() {
@@ -159,15 +188,6 @@ Ext.define('Ext.ux.picker.MultiMonth', {
         me.nextElEnd.addClsOnOver(me.baseCls + '-yearnav-next-over');
         
         me.callParent();
-    
-        if ( me.showButtons ) {
-            me.clearBtn = Ext.create('Ext.button.Button', {
-                text:     me.clearText,
-                renderTo: buttonsEl,
-                handler:  me.onClearClick,
-                scope:    me
-            });
-        };
     },
     
     clearValues: function() {

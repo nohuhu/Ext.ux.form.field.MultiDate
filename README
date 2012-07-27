@@ -57,9 +57,12 @@ Tested in:
     - Opera 11
     - Safari 5
 
-For usage, see demo applications.
+For usage, see respective demo applications.
 
-This extension is released under GPL 3.0 license. Commercial licensing
-is also available.
+This extension is released under GPL 3.0 license.
 
-Copyright (c) 2011 by Alexander Tokarev, <nohuhu@nohuhu.org>.
+Commercial use is permitted to the extent that the code/component(s) do NOT
+become part of another Open Source or Commercially licensed development library
+or toolkit without explicit permission.
+
+Copyright (c) 2011-2012 by Alexander Tokarev, <nohuhu@nohuhu.org>.

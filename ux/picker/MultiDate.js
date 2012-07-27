@@ -1,25 +1,20 @@
 /*
-    Date picker with support for multiple selections
-
-    Version 0.92
-
-    Copyright (C) 2011 Alexander Tokarev.
-    
-    Usage: not intended to be used directly
-    
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Date picker with support for multiple selections.
+ *
+ * Version 0.99, compatible with Ext JS 4.1.
+ *  
+ * Copyright (c) 2011-2012 Alexander Tokarev.
+ *  
+ * Usage: drop-in replacement for Ext.chart.Legend. See demo application
+ * for more details.
+ *
+ * This code is licensed under the terms of the Open Source LGPL 3.0 license.
+ * Commercial use is permitted to the extent that the code/component(s) do NOT
+ * become part of another Open Source or Commercially licensed development library
+ * or toolkit without explicit permission.
+ * 
+ * License details: http://www.gnu.org/licenses/lgpl.html
+ */
 
 Ext.define('Ext.ux.picker.MultiDate', {
     extend: 'Ext.picker.Date',
@@ -28,13 +23,13 @@ Ext.define('Ext.ux.picker.MultiDate', {
     alternateClassName: [ 'Ext.picker.MultiDate', 'Ext.MultiDatePicker' ],
     
     renderTpl: [
-        '<div class="{cls}" id="{id}" role="grid">',
+        '<div class="{cls}" id="{id}-innerEl" role="grid">',
             '<div role="presentation" class="{baseCls}-header">',
-                '<div class="{baseCls}-prev"><a id="{id}-prevEl" href="#" role="button" data-qtip="{prevText}"></a></div>',
-                '<div class="{baseCls}-month" id="{id}-middleBtnEl"></div>',
-                '<div class="{baseCls}-next"><a id="{id}-nextEl" href="#" role="button" data-qtip="{nextText}"></a></div>',
+                '<div class="{baseCls}-prev"><a id="{id}-prevEl" href="#" role="button" title="{prevText}"></a></div>',
+                '<div class="{baseCls}-month" id="{id}-middleBtnEl">{%this.renderMonthBtn(values, out)%}</div>',
+                '<div class="{baseCls}-next"><a id="{id}-nextEl" href="#" role="button" title="{nextText}"></a></div>',
             '</div>',
-            '<table id="{id}-eventEl" class="u{baseCls}-inner" cellspacing="0" role="presentation" title="{ariaTitle} {value:this.longDay}">',
+            '<table id="{id}-eventEl" class="u{baseCls}-inner" cellspacing="0" role="presentation">',
                 '<thead role="presentation"><tr role="presentation">',
                     '<tpl for="dayNames">',
                         '<th role="columnheader" title="{.}"><span>{.:this.firstInitial}</span></th>',
@@ -51,11 +46,19 @@ Ext.define('Ext.ux.picker.MultiDate', {
                     '</tpl>',
                 '</tr></tbody>',
             '</table>',
-            '<div id="{id}-footerEl" role="presentation" class="{baseCls}-footer"></div>',
+            '<div id="{id}-footerEl" role="presentation" class="{baseCls}-footer">',
+                '<tpl if="this.showToday">',
+                    '{%this.renderTodayBtn(values, out)%}',
+                '<tpl else>',
+                    '{%this.renderOkBtn(values, out)%}',
+                    '{%this.renderCancelBtn(values, out)%}',
+                    '{%this.renderClearBtn(values, out)%}',
+                '</tpl>',
+            '</div>',
         '</div>',
         {
             firstInitial: function(value) {
-                return value.substr(0,1);
+                return Ext.picker.Date.prototype.getDayInitial(value);
             },
             isEndOfWeek: function(value) {
                 // convert from 1 based index to 0 based
@@ -64,13 +67,25 @@ Ext.define('Ext.ux.picker.MultiDate', {
                 var end = value % 7 === 0 && value !== 0;
                 return end ? '</tr><tr role="row">' : '';
             },
-            longDay: function(value){
-                return Ext.Date.format(value, this.longDayFormat);
+            renderTodayBtn: function(values, out) {
+                Ext.DomHelper.generateMarkup(values.$comp.todayBtn.getRenderTree(), out);
+            },
+            renderOkBtn: function(values, out) {
+                Ext.DomHelper.generateMarkup(values.$comp.okBtn.getRenderTree(), out);
+            },
+            renderCancelBtn: function(values, out) {
+                Ext.DomHelper.generateMarkup(values.$comp.cancelBtn.getRenderTree(), out);
+            },
+            renderClearBtn: function(values, out) {
+                Ext.DomHelper.generateMarkup(values.$comp.clearBtn.getRenderTree(), out);
+            },
+            renderMonthBtn: function(values, out) {
+                Ext.DomHelper.generateMarkup(values.$comp.monthBtn.getRenderTree(), out);
             }
         }
     ],
     
-    nextText:      Ext.isMac ? 'Next Month (&#x2318;&#x2192;)'    : 'Next Month (Control+Right)',
+    nextText:      Ext.isMac ? 'Next Month (&#x2318;&#x2192;)' : 'Next Month (Control+Right)',
     prevText:      Ext.isMac ? 'Previous Month (&#x2318&#x2190;)' : 'Previous Month (Control+Left)',
     monthYearText: Ext.isMac ? 'Choose a month (&#x2318 + &#x2191;/&#x2193; to move years)' : 'Choose a month (Control+Up/Down to move years)',
     
@@ -105,15 +120,17 @@ Ext.define('Ext.ux.picker.MultiDate', {
     clearTooltip:  Ext.isMac ? 'Clear selection (⌘⌫)' : 'Clear selection (Ctrl+Backspace)',
     
     /**
-     * @cfg {Int[]} workDays Array of 0-based week day numbers that represent work week
-     * for given locale. Defaults to Monday-Friday.
+     * @cfg {Int[]/Boolean} workDays Array of 0-based week day numbers that represent
+     * work week for given locale. Defaults to Monday-Friday. Set to 'false' to turn
+     * this feature off.
      */
     workDays: [ 1, 2, 3, 4, 5 ],
     
     showToday: false,
     
     initComponent: function() {
-        var me = this;
+        var me = this,
+            wd = me.workDays;
         
         me.callParent(arguments);
         
@@ -121,38 +138,74 @@ Ext.define('Ext.ux.picker.MultiDate', {
         me.activeCls = 'ux-datepicker-active';
         
         me.selDates = [];
+        
+        if ( wd && Ext.isArray(wd) ) {
+            var hash = {
+                0: false, 1: false, 2: false, 3: false, 4: false, 5: false, 6: false
+            };
+            
+            for ( var i = 0, l = wd.length; i < l; i++ ) {
+                hash[ wd[i] ] = true;
+            };
+            
+            me.workDaysHash = hash;
+        }
+        else {
+            me.workDaysHash = {
+                0: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true
+            };
+        };
     },
     
-    onRender: function(container, position) {
+    beforeRender: function() {
         var me = this;
         
         me.callParent(arguments);
         
-        Ext.destroy(me.todayBtn);
+        if ( !me.showToday ) {
+            Ext.destroy(me.todayBtn);
+
+            var layout = me.getComponentLayout();
         
-        me.okBtn = Ext.create('Ext.button.Button', {
-            renderTo: me.footerEl,
-            text:     me.okText,
-            tooltip:  me.okTooltip,
-            handler:  me.onOkButton,
-            scope:    me
-        });
+            me.okBtn = new Ext.button.Button({
+                ownerCt:     me,
+                ownerLayout: layout,
+                text:        me.okText,
+                tooltip:     me.okTooltip,
+                handler:     me.onOkButton,
+                scope:       me
+            });
+            
+            me.cancelBtn = new Ext.button.Button({
+                ownerCt:     me,
+                ownerLayout: layout,
+                text:        me.cancelText,
+                tooltip:     me.cancelTooltip,
+                handler:     me.onCancelButton,
+                scope:       me
+            });
+            
+            me.clearBtn = new Ext.button.Button({
+                ownerCt:     me,
+                ownerLayout: layout,
+                text:        me.clearText,
+                tooltip:     me.clearTooltip,
+                handler:     me.clearSelection,
+                scope:       me
+            });
+        };
+    },
+    
+    finishRenderChildren: function() {
+        var me = this;
         
-        me.cancelBtn = Ext.create('Ext.button.Button', {
-            renderTo: me.footerEl,
-            text:     me.cancelText,
-            tooltip:  me.cancelTooltip,
-            handler:  me.onCancelButton,
-            scope:    me
-        });
+        me.callParent();
         
-        me.clearBtn = Ext.create('Ext.button.Button', {
-            renderTo: me.footerEl,
-            text:     me.clearText,
-            tooltip:  me.clearTooltip,
-            handler:  me.clearSelection,
-            scope:    me
-        });
+        if ( !me.showToday ) {
+            me.okBtn.finishRender();
+            me.cancelBtn.finishRender();
+            me.clearBtn.finishRender();
+        };
     },
     
     initEvents: function() {
@@ -177,7 +230,8 @@ Ext.define('Ext.ux.picker.MultiDate', {
         function getClearTime(d) { return Ext.Date.clearTime(d).getTime() };
         
         me.selDates = Ext.isArray(values) ? Ext.Array.map(values, getClearTime)
-                    :                      [ getClearTime(values) ];
+                    :                      [ getClearTime(values) ]
+                    ;
         
         me.update(me.selDates);
     },
@@ -231,61 +285,61 @@ Ext.define('Ext.ux.picker.MultiDate', {
         me.update(Ext.Date.clearTime( new Date() ));
     },
 
-    handleDateClick : function(e, t) {
+    handleDateClick : function(event, target) {
         var me = this,
             selDates = me.selDates,
-            rs = me.rangeSelection,
-            dt;
+            el, dv, dt;
 
-        e.stopEvent();
+        event.stopEvent();
         
-        if ( e.shiftKey && !e.ctrlKey ) {           // Select work week
-            dt = me.toggleWeekSelection(t);
+        el = Ext.fly(target.parentElement);
+        dv = target.dateValue;
+        
+        if ( event.shiftKey && !event.ctrlKey ) {           // Select work week
+            dt = me.toggleWeekSelection(el);
         }
-        else if ( e.ctrlKey ) {                     // Select range or work range (no toggling)
-            if ( !rs ) {    // Start selection
-                me.rangeSelection = t.dateValue;
-                dt = me.toggleDateSelection(t, true);
+        else if ( event.ctrlKey ) {        // Select range or work range (no toggling)
+            if ( !me.rangeSelection ) {    // Start selection
+                me.rangeSelection = dv;
+                dt = me.toggleDateSelection(el, true, dv);
             }
             else {          // End selection
-               dt = me.selectRange(rs, t.dateValue, e.shiftKey);
+               dt = me.selectRange(me.rangeSelection, dv, event.shiftKey);
                me.rangeSelection = false;
             };
         }
         else {                                      // Select single day
-            dt = me.toggleDateSelection(t);
+            dt = me.toggleDateSelection(el, undefined, dv);
         };
         
         if ( dt ) {
             me.update(selDates);
         };
+        
+        // Set active date, too
+        me.update( new Date(dv) );
     },
 
-    handleSpacebar: function(keycode, e) {
-        var me = this,
+    handleSpacebar: function(keycode, event) {
+        var me       = this,
             selDates = me.selDates,
-            cells = me.cells,
-            acls = me.activeCls,
-            active = me.activeDate.getTime(),
-            activeCell, activeIdx, dt;
+            cells    = me.cells,
+            activeDate, activeCell, activeIdx, dt;
         
-        activeIdx = me.getCellIndex(active);
+        activeDate = me.activeDate.getTime();
+        activeIdx  = me.getCellIndex(activeDate);
         
-        if ( activeIdx === undefined ) {
+        if ( activeIdx == -1 ) {
             return;
         };
         
         activeCell = cells.item(activeIdx);
         
-        if ( e.shiftKey ) {
-            dt = me.toggleWeekSelection(activeCell.dom.firstChild, activeIdx);
-        }
-        else {
-            dt = me.toggleDateSelection(activeCell.dom.firstChild);
-        };
+        dt = event.shiftKey ? me.toggleWeekSelection(activeCell, activeIdx)
+           :                  me.toggleDateSelection(activeCell, undefined, activeDate)
+           ;
         
         if ( dt ) {
-            activeCell.addCls(acls);
             me.update(selDates);
         };
     },
@@ -300,53 +354,65 @@ Ext.define('Ext.ux.picker.MultiDate', {
             
         // This is suboptimal but I don't know a way to do it otherwise
         // without affecting me.cells.
-        cells.filter(function(c, idx) {
-            if ( c.dom.firstChild.dateValue === value ) {
+        cells.each(function(el, c, idx) {
+            if ( !index && el.down('a').getAttribute('dateValue') === value ) {
                 index = idx;
             };
         });
         
-        return index;
+        return index === undefined ? -1 : index;
     },
     
     selectRange: function(start, end, workWeek) {
-        var me = this,
-            workDays = me.workDays,
+        var me       = this,
             selDates = me.selDates,
-            tmp;
+            wdHash   = me.workDaysHash,
+            add      = Ext.Date.add,
+            DAY      = Ext.Date.DAY,
+            contains = Ext.Array.contains,
+            include  = Ext.Array.include,
+            tmp, dt, dv;
         
         // JS is ugly.
         if ( start > end ) {
-            tmp = start;
+            tmp   = start;
             start = end;
-            end = tmp;
+            end   = tmp;
         };
         
+        // If start date falls on a weekend we shouldn't allow it
+        // to be selected
+        Ext.Array.remove( selDates, new Date(start).getTime() );
+        
         DATE:
-        for ( var dt = new Date(start); dt.getTime() <= end; dt = Ext.Date.add(dt, Ext.Date.DAY, 1) ) {
-            if ( workWeek && !Ext.Array.contains(workDays, dt.getDay()) ) {
+        for ( dt = new Date(start), dv = dt.getTime();
+              dv <= end;
+              dt = add(dt, DAY, 1), dv = dt.getTime() )
+        {
+            if ( workWeek && !wdHash[ dt.getDay() ] ) {
                 continue DATE;
             };
             
-            Ext.Array.include(selDates, dt.getTime());
+            include(selDates, dv);
         };
         
         return true;
     },
     
-    toggleWeekSelection: function(c, index) {
-        var me = this,
-            cells = me.cells,
-            dCls = me.disabledCellCls,
-            workDays = me.workDays,
+    toggleWeekSelection: function(el, index) {
+        var me          = this,
+            cells       = me.cells,
+            selectedCls = me.selectedCls,
+            disabledCls = me.disabledCellCls,
+            workDays    = me.workDays,
             selected, dayNo, firstDay;
         
         if ( index === undefined ) {
-            index = me.getCellIndex(c.dateValue);
+            index = me.getCellIndex( el.down('a').getAttribute('dateValue') );
         };
         
-        if ( !me.disabled && !Ext.fly(c.parentNode).hasCls(dCls) ) {
-            selected = me.getDaySelection(c);
+        if ( !me.disabled && !el.hasCls(disabledCls) ) {
+            selected = el.hasCls(selectedCls);
             dayNo    = index % 7;
             firstDay = index - dayNo;
             
@@ -357,8 +423,7 @@ Ext.define('Ext.ux.picker.MultiDate', {
                     l = firstDay + workDays[ workDays.length - 1 ];
                     
                 for (; i <= l; i++ ) {
-                    var cell = cells.item(i);
-                    me.toggleDateSelection(cell.dom.firstChild, !selected);
+                    me.toggleDateSelection( cells.item(i), !selected );
                 };
             };
         };
@@ -366,62 +431,63 @@ Ext.define('Ext.ux.picker.MultiDate', {
         return true;
     },
     
-    getDaySelection: function(c) {
-        var me = this,
-            sCls = me.selectedCls,
-            dCls = me.disabledCellCls,
-            parent = Ext.fly(c.parentNode);
-        
-        return parent.hasCls(sCls);
-    },
-    
-    toggleDateSelection: function(c, state) {
+    toggleDateSelection: function(el, state, dv) {
         var me = this,
             selDates = me.selDates,
-            sCls = me.selectedCls,
-            dCls = me.disabledCellCls,
-            parent = Ext.fly(c.parentNode),
-            selected, fn;
+            selectedCls = me.selectedCls,
+            disabledCls = me.disabledCellCls,
+            selected, dv;
         
-        if ( !me.disabled && c.dateValue && !parent.hasCls(dCls) ) {
-            selected = state !== undefined ? !state : parent.hasCls(sCls);
+        if ( dv === undefined ) {
+            dv = el.down('a').getAttribute('dateValue');
+        };
+        
+        if ( !me.disabled && !el.hasCls(disabledCls) && dv ) {
+            selected = state !== undefined ? !state : el.hasCls(selectedCls);
             
-            (selected ? Ext.Array.remove : Ext.Array.include)(selDates, c.dateValue);
+            if ( selected ) {
+                Ext.Array.remove(selDates, dv);
+            }
+            else {
+                Ext.Array.include(selDates, dv);
+            };
             
-            return c;
+            return el;
         };
         
         return undefined;
     },
     
     selectedUpdate: function(dates, active) {
-        var me = this,
-            cells = me.cells,
-            sCls = me.selectedCls,
-            aCls = me.activeCls,
+        var me          = this,
+            cells       = me.cells,
+            selectedCls = me.selectedCls,
+            activeCls   = me.activeCls,
             visible, cancelFocus;
         
         visible     = me.isVisible();
         cancelFocus = !me.focusOnSelect;
         
-        cells.removeCls(sCls);
-        cells.removeCls(aCls);
-        
-        cells.each( function(c) {
-            var dv = c.dom.firstChild.dateValue;
+        cells.each( function(el) {
+            var picker = this,
+                dv;
+            
+            el.removeCls([activeCls, selectedCls]);
+            
+            dv = el.down('a').getAttribute('dateValue');
             
             if ( dv === active ) {
-                this.el.dom.setAttribute('aria-activedescendent', c.dom.id);
+                picker.getEl().set({ 'aria-activedescendant': el.id });
                 
-                c.addCls(aCls);
+                el.addCls(activeCls);
                 
                 if ( visible && !cancelFocus ) {
-                    Ext.fly(c.dom.firstChild).focus(50);
+                    Ext.fly( el.down('a') ).focus(50);
                 };
             };
             
             if ( Ext.Array.contains(dates, dv) ) {
-                c.addCls(sCls);
+                el.addCls(selectedCls);
             };
         }, me);
     },

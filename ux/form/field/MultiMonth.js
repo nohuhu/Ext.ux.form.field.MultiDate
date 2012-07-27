@@ -1,26 +1,20 @@
 /*
-    Input field that allows selecting either single month or a range of months.
-    Range is selected as start and end months, inclusive.
-
-    Version 0.92
-
-    Copyright (C) 2011 Alexander Tokarev.
-    
-    Usage: not intended to be used directly
-    
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Input field that allows selecting either single month or a range of months.
+ * Range is selected as start and end months, inclusive.
+ *
+ * Version 0.99, compatible with Ext JS 4.1.
+ *  
+ * Copyright (c) 2011-2012 Alexander Tokarev.
+ *  
+ * Usage: see demo application.
+ *
+ * This code is licensed under the terms of the Open Source LGPL 3.0 license.
+ * Commercial use is permitted to the extent that the code/component(s) do NOT
+ * become part of another Open Source or Commercially licensed development library
+ * or toolkit without explicit permission.
+ * 
+ * License details: http://www.gnu.org/licenses/lgpl.html
+ */
 
 Ext.define('Ext.ux.form.field.MultiMonth', {
     extend: 'Ext.ux.form.field.MultiDate',
@@ -47,11 +41,6 @@ Ext.define('Ext.ux.form.field.MultiMonth', {
      */
     endingMonthText: 'Ending Month',
     
-    /**
-     * @cfg {String} clearText 'Clear' button text.
-     */
-    clearText: 'Clear',
-
     valueSeparatorRE: /^$/,
     
     format: 'm/Y',
@@ -75,13 +64,15 @@ Ext.define('Ext.ux.form.field.MultiMonth', {
                 format: me.format,
                 startingMonthText: me.startingMonthText,
                 endingMonthText: me.endingMonthText,
+                okText: me.okText,
+                cancelText: me.cancelText,
                 clearText: me.clearText,
                 minText: format(me.minText, me.formatDate(me.minValue)),
                 maxText: format(me.maxText, me.formatDate(me.maxValue)),
                 listeners: {
                     scope: me,
                     cancelclick: me.onCancelClick,
-                    okclick: me.onOkClick,
+                    okclick: me.onOkClick
                 },
                 keyNavConfig: {
                     esc: function() {
@@ -125,19 +116,54 @@ Ext.define('Ext.ux.form.field.MultiMonth', {
             multi = me.multiValue,
             rsep = me.rangeSeparatorRE,
             format = Ext.String.format,
-            errors, range;
+            errors, range, dt, isValid;
         
         errors = me.callParent(arguments) || [];
         
+        if ( errors.length ) return errors;
+        
         if ( multi && values !== '' ) {      // Blank values are checked in ancestor class
-            range = me.splitValues(values, rsep);
+
+            // Try to validate the value as a single; it may just be one
+            dt = me.parseDate(values);
             
-            if ( range.length < 2 ) {
-                errors.push( format(me.invalidRangeText, values) );
+            if ( Ext.isDate(dt) ) {
+                isValid = me.validateDate(values);
+                
+                if ( isValid !== true ) {
+                    errors.push(isValid);
+                };
+            }
+            else {
+                range = me.splitValues(values, rsep);
+                
+                if ( range.length < 2 ) {
+                    errors.push( format(me.invalidRangeText, values) );
+                };
             };
         };
         
         return errors;
+    },
+    
+    setSubmitValue: function(value) {
+        var me = this,
+            fmt = me.submitFormat,
+            vsep, rsep, values, text;
+        
+        vsep = new XRegExp(me.submitValueSeparator);
+        rsep = new XRegExp(me.submitRangeSeparator);
+        
+        values = me.splitValues(value, rsep);
+        
+        if ( !me.multiValue ) {
+            text = me.formatDisplayValue(values[0], fmt);
+        }
+        else {
+            text = me.formatDisplay(values, undefined, undefined, fmt);
+        };
+        
+        me.setRawValue(text || '');
     },
     
     onCancelClick: function() {
@@ -191,13 +217,13 @@ Ext.define('Ext.ux.form.field.MultiMonth', {
         return Ext.isString(res) ? res : '';
     },
     
-    formatDisplayValue: function(value) {
+    formatDisplayValue: function(value, format) {
         var me = this,
             fmt = me.format,
-            text, dt, res;
+            dt, res;
         
         try {
-            dt   = Ext.Date.clearTime( me.parseDate(value) );
+            dt   = Ext.Date.clearTime( me.parseDate(value, format) );
             res  = Ext.Date.format(dt, fmt);
         }
         catch (e) {};
@@ -205,7 +231,7 @@ Ext.define('Ext.ux.form.field.MultiMonth', {
         return Ext.isString(res) ? res : value;
     },
     
-    formatDisplay: function(values, rsep, vsep) {
+    formatDisplay: function(values, rsep, vsep, format) {
         var me = this,
             start, end;
         
@@ -213,18 +239,18 @@ Ext.define('Ext.ux.form.field.MultiMonth', {
             return values;          // Should be a string
         };
         
-        start = me.formatDisplayValue( values[0] );
-        end   = me.formatDisplayValue( values[1] );
+        start = me.formatDisplayValue( values[0], format );
+        end   = me.formatDisplayValue( values[1], format );
         
         return start && end ? start + (rsep || me.displayRangeSeparator) + end
              :                ''
              ;
     },
     
-    expandValues: function(text) {
-        var me = this,
-            rsep = me.rangeSeparatorRE,
-            fmt = me.format,
+    expandValues: function(text, format, vSeparator, rSeparator) {
+        var me   = this,
+            rsep = rSeparator || me.rangeSeparatorRE,
+            fmt  = format     || me.format,
             values, result;
         
         if ( text === '' || text === null ) {

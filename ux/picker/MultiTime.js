@@ -1,25 +1,20 @@
 /*
-    Picker for selecting a period of time.
-
-    Version 0.92
-
-    Copyright (C) 2011 Alexander Tokarev.
-    
-    Usage: not intended to be used directly
-    
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * Picker for selecting a period of time.
+ *
+ * Version 0.99, compatible with Ext JS 4.1.
+ *  
+ * Copyright (c) 2011-2012 Alexander Tokarev.
+ *  
+ * Usage: drop-in replacement for Ext.chart.Legend. See demo application
+ * for more details.
+ *
+ * This code is licensed under the terms of the Open Source LGPL 3.0 license.
+ * Commercial use is permitted to the extent that the code/component(s) do NOT
+ * become part of another Open Source or Commercially licensed development library
+ * or toolkit without explicit permission.
+ * 
+ * License details: http://www.gnu.org/licenses/lgpl.html
+ */
 
 Ext.define('Ext.ux.picker.MultiTime', {
     extend: 'Ext.Component',
@@ -36,14 +31,17 @@ Ext.define('Ext.ux.picker.MultiTime', {
         'Ext.button.Button'
     ],
     
+    childEls: [
+        'bodyEl', 'eventEl', 'bodyElStart', 'bodyElEnd', 'buttonsEl'
+    ],
+    
     renderTpl: [
-        '<div id="{id}-tableEl" class="{baseCls}-table">',
+        '<div id="{id}-bodyEl" class="{baseCls}-table">',
             '<div class="{baseCls}-header {baseCls}-table-row{ie}">',
                 '<tpl if="multiValue">',
                     '<div class="{baseCls}-header-item{ie}">{startingTimeText}</div>',
                     '<div class="{baseCls}-header-item{ie}">{endingTimeText}</div>',
-                '</tpl>',
-                '<tpl if="!multiValue">',
+                '<tpl else>',
                     '<div class="{baseCls}-header-item{ie}">{selectTimeText}</div>',
                 '</tpl>',
             '</div>',
@@ -104,7 +102,19 @@ Ext.define('Ext.ux.picker.MultiTime', {
                 '</tpl>',
             '</div>',
         '</div>',
-        '<div id="{id}-buttonsEl" class="{baseCls}-buttons"></div>',
+        '<div id="{id}-buttonsEl" class="{baseCls}-buttons">{%',
+            'var me        = values.$comp,',
+                'okBtn     = me.okBtn,',
+                'cancelBtn = me.cancelBtn,',
+                'clearBtn  = me.clearBtn;',
+            
+            'okBtn.ownerLayout = cancelBtn.ownerLayout = clearBtn.ownerLayout = me.componentLayout;',
+            'okBtn.ownerCt     = cancelBtn.ownerCt     = clearBtn.ownerCt     = me;',
+            
+            'Ext.DomHelper.generateMarkup(okBtn.getRenderTree(), out);',
+            'Ext.DomHelper.generateMarkup(cancelBtn.getRenderTree(), out);',
+            'Ext.DomHelper.generateMarkup(clearBtn.getRenderTree(), out);',
+        '%}</div>'
     ],
     
 	/**
@@ -251,6 +261,7 @@ Ext.define('Ext.ux.picker.MultiTime', {
         
         me.callParent();
         
+        me.initButtons();
         me.initDisabledValues();
         me.setInitialValue();
     },
@@ -295,19 +306,11 @@ Ext.define('Ext.ux.picker.MultiTime', {
     },
     
     // private, inherit docs
-    onRender: function(ct, position) {
+    beforeRender: function() {
         var me = this;
-        
-        me.initChildElements();
         
         me.callParent(arguments);
-    },
-    
-    initRenderData: function() {
-        var me = this;
 
-        me.callParent();
-        
         Ext.apply(me.renderData, {
             selectTimeText:   me.selectTimeText,
             startingTimeText: me.startingTimeText,
@@ -322,31 +325,25 @@ Ext.define('Ext.ux.picker.MultiTime', {
             multiValue:       me.multiValue,
             ie:               Ext.isIE6 || Ext.isIE7 ? '-ie' : ''
         });
-        
-        return me.renderData;
-    },
-    
-    initChildElements: function() {
-        var me = this;
-        
-        me.addChildEls('bodyElStart', 'eventEl', 'buttonsEl');
-        
-        if ( me.multiValue ) {
-            me.addChildEls('bodyElEnd');
-        };
     },
     
     afterRender: function() {
-        var me = this,
-            body = me.bodyElEnd,
-            buttonsEl = me.buttonsEl;
+        var me = this;
             
+        me.callParent();
+        
         me.initEvents();
         me.initCollections();
+    },
+    
+    finishRenderChildren: function() {
+        var me = this;
         
         me.callParent();
         
-        me.initButtons();
+        me.okBtn.finishRender();
+        me.cancelBtn.finishRender();
+        me.clearBtn.finishRender();
     },
     
     initEvents: function() {
@@ -394,9 +391,8 @@ Ext.define('Ext.ux.picker.MultiTime', {
     initOkButton: function() {
         var me = this;
 
-        return Ext.create('Ext.button.Button', {
+        return new Ext.button.Button({
             text:     me.okText,
-            renderTo: me.buttonsEl,
             handler:  me.onOkClick,
             scope:    me
         });
@@ -405,9 +401,8 @@ Ext.define('Ext.ux.picker.MultiTime', {
     initCancelButton: function() {
         var me = this;
         
-        return Ext.create('Ext.button.Button', {
+        return new Ext.button.Button({
             text:     me.cancelText,
-            renderTo: me.buttonsEl,
             handler:  me.onCancelClick,
             scope:    me
         });
@@ -416,9 +411,8 @@ Ext.define('Ext.ux.picker.MultiTime', {
     initClearButton: function() {
         var me = this;
         
-        return Ext.create('Ext.button.Button', {
+        return new Ext.button.Button({
             text:     me.clearText,
-            renderTo: me.buttonsEl,
             handler:  me.onClearClick,
             scope:    me
         });
@@ -758,7 +752,7 @@ Ext.define('Ext.ux.picker.MultiTime', {
             );
         };
 
-        Ext.destroyMembers('bodyElStart', 'bodyElEnd', 'eventEl', 'buttonsEl');
+        Ext.destroyMembers('bodyEl', 'bodyElStart', 'bodyElEnd', 'eventEl', 'buttonsEl');
         
         me.callParent();
     }
