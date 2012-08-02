@@ -5,9 +5,6 @@
  *  
  * Copyright (c) 2011-2012 Alexander Tokarev.
  *  
- * Usage: drop-in replacement for Ext.chart.Legend. See demo application
- * for more details.
- *
  * This code is licensed under the terms of the Open Source LGPL 3.0 license.
  * Commercial use is permitted to the extent that the code/component(s) do NOT
  * become part of another Open Source or Commercially licensed development library
